@@ -30,7 +30,7 @@
         - create, kill and change process priority
         - list imported/exported modules, along with other PE information
         
-    Please note that this is cca. 20 yesrs old code, not particullary something
+    Please note that this is cca. 20 years old code, not particullary something
     to write home about :-))
     
     It's taylored to my own needs, modify it to suit your own. I'm not a professional programmer,
