@@ -8,7 +8,7 @@ Uses the PEHLP32 library (https://github.com/yo3gfh/pehlp32)
 This was initially a lab project and test app for the PEHLP32 library.
 Dugged out recently and dusted off to compile with Pelle's C compiler.
     
-                                0 0 0
+-----
                                 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-                                0 0 0 
+----- 
 
 **Features**
     
