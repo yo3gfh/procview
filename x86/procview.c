@@ -30,7 +30,7 @@
         - create, kill and change process priority
         - list imported/exported modules, along with other PE information
         
-    Please note that this is cca. 20 years old code, not particullary something
+    Please note that this is cca. 20 yesrs old code, not particullary something
     to write home about :-))
     
     It's taylored to my own needs, modify it to suit your own. I'm not a professional programmer,
@@ -83,28 +83,31 @@ typedef struct
 
 // FUNCTION PROTOTYPES
 
-static LRESULT      CALLBACK    WndProc         ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-static BOOL         CALLBACK    AboutDlgProc    ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
-static BOOL         CALLBACK    PropsDlgProc    ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
-static BOOL         CALLBACK    EnumImpProc     ( IMPORT_INFO *impinfo, DWORD lParam );
-static BOOL         CALLBACK    EnumExpProc     ( EXPORT_INFO *expinfo, DWORD lParam );
-static BOOL         CALLBACK    EnumSecProc     ( SECTION_INFO *secinfo, DWORD lParam );
-static BOOL         CALLBACK    EnumAttrProc    ( TCHAR *buf, DWORD lParam );
-static              int         ShowMessage     ( HWND howner, TCHAR *message, DWORD style );
-static              void        GetProcesses    ( HWND hList );
-static              void        GetModules      ( HWND hList, LONG pid );
-static              DWORD       GetCpuFreq      ( void );
-static              void        ContextMenu     ( void );
-static              void        CheckRadioMenus ( void );
-static              void        ToggleMenus     ( HMENU hmenu );
-static              BOOL        KillProcess     ( void );
-static              BOOL        SetPriority     ( DWORD pclass );
-static              void        AdvancedInfo    ( HWND hparent );
-static              BOOL        PEInfo          ( HWND hdlg );
-static              BOOL        SetPrivilege    ( HANDLE hToken, TCHAR * Privilege, BOOL bEnablePrivilege );
-static              BOOL        IsNT            ( void );
-static              void        SetRights       ( void );
-static              void        CenterWindow    ( HWND hwnd );
+static LRESULT CALLBACK     WndProc             ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
+static BOOL CALLBACK        AboutDlgProc        ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static BOOL CALLBACK        PropsDlgProc        ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static void                 Process_WM_COMMAND  ( HWND hwnd, WPARAM wParam, LPARAM lParam );
+static void                 Process_WM_NOTIFY   ( HWND hwnd, WPARAM wParam, LPARAM lParam );
+static void                 InitPropsDlg        ( HWND hDlg );
+static BOOL CALLBACK        EnumImpProc         ( IMPORT_INFO *impinfo, DWORD lParam );
+static BOOL CALLBACK        EnumExpProc         ( EXPORT_INFO *expinfo, DWORD lParam );
+static BOOL CALLBACK        EnumSecProc         ( SECTION_INFO *secinfo, DWORD lParam );
+static BOOL CALLBACK        EnumAttrProc        ( TCHAR *buf, DWORD lParam );
+static int                  ShowMessage         ( HWND howner, TCHAR *message, DWORD style );
+static void                 GetProcesses        ( HWND hList );
+static void                 GetModules          ( HWND hList, LONG pid );
+static DWORD                GetCpuFreq          ( void );
+static void                 ContextMenu         ( void );
+static void                 CheckRadioMenus     ( void );
+static void                 ToggleMenus         ( HMENU hmenu );
+static BOOL                 KillProcess         ( void );
+static BOOL                 SetPriority         ( DWORD pclass );
+static void                 AdvancedInfo        ( HWND hparent );
+static BOOL                 PEInfo              ( HWND hdlg );
+static BOOL                 SetPrivilege        ( HANDLE hToken, TCHAR * Privilege, BOOL bEnablePrivilege );
+static BOOL                 IsNT                ( void );
+static void                 SetRights           ( void );
+static void                 CenterWindow        ( HWND hwnd );
 
 //
 // GLOBALS
@@ -200,21 +203,21 @@ static BOOL CALLBACK AboutDlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 {
     switch ( uMsg )
     {
-    case WM_INITDIALOG:
-        break;
+        case WM_INITDIALOG:
+            break;
 
-    case WM_CLOSE:
-        EndDialog ( hDlg, FALSE );
-        break;
+        case WM_CLOSE:
+            EndDialog ( hDlg, FALSE );
+            break;
 
-    case WM_COMMAND:
-        if ( LOWORD ( wParam ) == IDCANCEL )
-            SendMessage ( hDlg, WM_CLOSE, 0, 0 );
-        break;
+        case WM_COMMAND:
+            if ( LOWORD ( wParam ) == IDCANCEL )
+                SendMessage ( hDlg, WM_CLOSE, 0, 0 );
+            break;
 
-    default:
-        return FALSE;
-        break;
+        default:
+            return FALSE;
+            break;
     }
 
     return TRUE;
@@ -224,80 +227,37 @@ static BOOL CALLBACK PropsDlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 /*******************************************************************************************************************/
 /* "Properties" dlg callback proc                                                                                  */
 {
-    TCHAR       buf[256];
-    HWND        hmodlst, hexplst, himplst;
-    int         index;
-    DWORD       pid;
-    HANDLE      hProc;
-    FILETIME    ft1, ft2, ft3, ft4, local;
-    SYSTEMTIME  st;
-
     switch ( uMsg )
     {
-    case WM_INITDIALOG:
-        CenterWindow ( hDlg );
-        hmodlst = GetDlgItem ( hDlg, IDC_MODULELIST );
-        hexplst = GetDlgItem ( hDlg, IDC_EXPLIST );
-        himplst = GetDlgItem ( hDlg, IDC_IMPLIST );
-        ListView_SetExtendedListViewStyle ( hmodlst, LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP );
-        ListView_SetExtendedListViewStyle ( himplst, LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP );
-        ListView_SetExtendedListViewStyle ( hexplst, LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP );
-        InitModuleColumns ( hmodlst );
-        InitImpColumns ( himplst );
-        InitExpColumns ( hexplst );
-        index   = LVGetSelIndex ( g_hList );
-        LVGetItemText ( g_hList, index, 0, buf, sizeof ( buf ) );
-        SetWindowText ( hDlg, buf );
-        LVGetItemText ( g_hList, index, 1, buf, sizeof ( buf ) );
-        pid = MyAtol ( buf );
-        GetModules ( hmodlst, pid );
+        case WM_INITDIALOG:
+            InitPropsDlg ( hDlg );
+            break;
 
-        if ( IsNT() )
-        {
-            hProc = OpenProcess ( PROCESS_QUERY_INFORMATION, FALSE, pid );
-            if ( hProc )
+        // doubleclick via WM_NOTIFY
+        case WM_NOTIFY:
+            if ( wParam == IDC_MODULELIST )
             {
-                if ( GetProcessTimes ( hProc, &ft1, &ft2, &ft3, &ft4 ) )
+                switch ( ( ( NMHDR *) lParam )->code )
                 {
-                    FileTimeToLocalFileTime ( &ft1, &local );
-                    FileTimeToSystemTime ( &local, &st );
-                    wsprintf ( buf, TEXT("Process started on %0.2lu/%0.2lu/%lu, %0.2lu:%0.2lu:%0.2lu -- %d loaded modules" ),
-                              st.wDay, st.wMonth, st.wYear,
-                              st.wHour, st.wMinute, st.wSecond,
-                              LVGetCount ( hmodlst )
-                             );
-                    SetDlgItemText ( hDlg, IDC_STATIC2, buf );
-                    CloseHandle ( hProc );
+                    case NM_DBLCLK:
+                        PEInfo ( hDlg );
+                        break;
                 }
-            }
-        }
-        break;
+            }        
+            break;
+        
+        case WM_CLOSE:
+            EndDialog ( hDlg, FALSE );
+            break;
 
-    // doubleclick via WM_NOTIFY
-    case WM_NOTIFY:
-        if ( wParam == IDC_MODULELIST )
-        {
-            switch ( ( ( NMHDR *) lParam )->code )
-            {
-                case NM_DBLCLK:
-                    PEInfo ( hDlg );
-                    break;
-            }
-        }        
-        break;
-    
-    case WM_CLOSE:
-        EndDialog ( hDlg, FALSE );
-        break;
+        case WM_COMMAND:
+            if ( LOWORD ( wParam ) == IDCANCEL )
+                SendMessage ( hDlg, WM_CLOSE, 0, 0 );
+            break;
 
-    case WM_COMMAND:
-        if ( LOWORD ( wParam ) == IDCANCEL )
-            SendMessage ( hDlg, WM_CLOSE, 0, 0 );
-        break;
-
-    default:
-        return FALSE;
-        break;
+        default:
+            return FALSE;
+            break;
     }
 
     return TRUE;
@@ -312,163 +272,62 @@ static LRESULT CALLBACK WndProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
     switch ( message )
     {
-    case WM_MENUSELECT:
-        MyMenuHelp ( g_hInst, g_hStatusbar, wParam );
-        SendMessage ( g_hStatusbar, WM_PAINT, 0, 0 );
-        break;
+        case WM_MENUSELECT:
+            MyMenuHelp ( g_hInst, g_hStatusbar, wParam );
+            SendMessage ( g_hStatusbar, WM_PAINT, 0, 0 );
+            break;
 
-    case WM_SIZE:
-        SendMessage ( g_hStatusbar, WM_SIZE, 0, 0 );
-        GetClientRect ( g_hStatusbar, &rstat );
-        MoveWindow ( g_hList, 0, 0, LOWORD ( lParam ),
-                    HIWORD ( lParam ) - rstat.bottom, TRUE );
-        break;
+        case WM_SIZE:
+            SendMessage ( g_hStatusbar, WM_SIZE, 0, 0 );
+            GetClientRect ( g_hStatusbar, &rstat );
+            MoveWindow ( g_hList, 0, 0, LOWORD ( lParam ),
+                        HIWORD ( lParam ) - rstat.bottom, TRUE );
+            break;
 
-    case WM_CREATE:
-        g_hStatusbar = MakeStatusBar ( hwnd, IDC_STATUSBAR, g_sbpanels, 4 );
-        g_hList      = MakeListView ( g_hInst, hwnd );
-        if ( ( g_hIml = InitImgList ( g_hInst ) ) != NULL )
-            ListView_SetImageList ( g_hList, g_hIml, LVSIL_SMALL );
-        InitProcessColumns ( g_hList );
-        GetProcesses ( g_hList );
-        wsprintf ( buf, TEXT("CPU: %lu Mhz"), GetCpuFreq() );
-        SBSetText ( g_hStatusbar, 1, buf );
-        break;
+        case WM_CREATE:
+            g_hStatusbar = MakeStatusBar ( hwnd, IDC_STATUSBAR, g_sbpanels, 4 );
+            g_hList      = MakeListView ( g_hInst, hwnd );
+            if ( ( g_hIml = InitImgList ( g_hInst ) ) != NULL )
+                ListView_SetImageList ( g_hList, g_hIml, LVSIL_SMALL );
+            InitProcessColumns ( g_hList );
+            GetProcesses ( g_hList );
+            wsprintf ( buf, TEXT("CPU: %lu Mhz"), GetCpuFreq() );
+            SBSetText ( g_hStatusbar, 1, buf );
+            break;
 
-    case WM_SETFOCUS:
-        SetFocus ( g_hList );
-        break;
+        case WM_SETFOCUS:
+            SetFocus ( g_hList );
+            break;
 
-    case WM_INITMENUPOPUP:
-        if (LOWORD ( lParam ) == 1 )
-        {
-            CheckRadioMenus();
-            ToggleMenus ( ( HMENU ) wParam );
-        }
-        break;
-
-    case WM_NOTIFY:
-        if ( wParam == IDC_PROCLIST )
-        {
-            switch ( ( ( NMHDR *) lParam )->code )
+        case WM_INITMENUPOPUP:
+            if (LOWORD ( lParam ) == 1 )
             {
-                case NM_RCLICK:
-                    if ( LVGetSelIndex ( g_hList ) != -1 )
-                    {
-                        CheckRadioMenus();
-                        ToggleMenus ( GetSubMenu ( g_hMainmenu, 1 ) );
-                        ContextMenu();
-                    }
-                    break;
-
-                case NM_DBLCLK:
-                    AdvancedInfo ( hwnd );
-                    break;
+                CheckRadioMenus();
+                ToggleMenus ( ( HMENU ) wParam );
             }
-        }
-        break;
+            break;
 
-    case WM_COMMAND:
-        if ( !lParam )
-        {
-            // menu processing
-            switch ( LOWORD ( wParam ) )
-            {
-                case IDM_QUIT:
-                    SendMessage ( hwnd, WM_CLOSE, 0, 0 );
-                    break;
+        case WM_NOTIFY:
+            Process_WM_NOTIFY ( hwnd, wParam, lParam );
+            break;
 
-                case IDM_RUN:
-                    RunFileDlg ( hwnd, g_hIcon, NULL, NULL, NULL, 0 );
-                    LVClear ( g_hList );
-                    GetProcesses ( g_hList );
-                    break;
+        case WM_COMMAND:
+            Process_WM_COMMAND ( hwnd, wParam, lParam );
+            break;
 
-                case IDM_ABOUT:
-                    DialogBoxParam ( g_hInst, MAKEINTRESOURCE ( IDD_ABOUT ),
-                                    hwnd, AboutDlgProc, ( LPARAM )hwnd );
-                    break;
+        case WM_CLOSE:
+            DestroyWindow ( hwnd );
+            break;
 
-                case IDM_PROP:
-                    AdvancedInfo ( hwnd );
-                    break;
+        case WM_DESTROY:
+            if ( g_hIml )
+                ImageList_Destroy ( g_hIml );
+            PostQuitMessage ( 0 ) ;
+            break;
 
-                case IDM_REFRESH:
-                    LVClear ( g_hList );
-                    GetProcesses ( g_hList );
-                    break;
-                
-                case IDM_PRI_IDLE:
-                    if ( !SetPriority (IDLE_PRIORITY_CLASS ) )
-                    {
-                        ShowMessage ( hwnd, TEXT("Unable to set priority."), MB_OK );
-                        break;
-                    }
-                    Sleep ( 50 );
-                    LVClear ( g_hList );
-                    GetProcesses ( g_hList );
-                    break;
-
-                case IDM_PRI_NOR:
-                    if ( !SetPriority ( NORMAL_PRIORITY_CLASS ) )
-                    {
-                        ShowMessage ( hwnd, TEXT("Unable to set priority."), MB_OK );
-                        break;
-                    }
-                    Sleep ( 50 );
-                    LVClear ( g_hList );
-                    GetProcesses ( g_hList );
-                    break;
-
-                case IDM_PRI_HI:
-                    if ( !SetPriority (HIGH_PRIORITY_CLASS ) )
-                    {
-                        ShowMessage ( hwnd, TEXT("Unable to set priority."), MB_OK );
-                        break;
-                    }
-                    Sleep ( 50 );
-                    LVClear ( g_hList );
-                    GetProcesses ( g_hList );
-                    break;
-
-                case IDM_PRI_REAL:
-                    if ( !SetPriority ( REALTIME_PRIORITY_CLASS ) )
-                    {
-                        ShowMessage ( hwnd, TEXT("Unable to set priority."), MB_OK );
-                        break;
-                    }
-                    Sleep ( 50 );
-                    LVClear ( g_hList );
-                    GetProcesses ( g_hList );
-                    break;
-
-                case IDM_KILL:
-                    if ( ShowMessage ( hwnd, TEXT("Terminate this process?"), MB_YESNOCANCEL ) == IDYES )
-                    {
-                        if ( !KillProcess() )
-                            ShowMessage ( hwnd, TEXT("Unable to terminate process."), MB_OK );
-                        Sleep ( 300 );
-                        LVClear ( g_hList );
-                        GetProcesses ( g_hList );
-                    }
-                    break;
-            }
-        }
-        break;
-
-    case WM_CLOSE:
-        DestroyWindow ( hwnd );
-        break;
-
-    case WM_DESTROY:
-        if ( g_hIml )
-            ImageList_Destroy ( g_hIml );
-        PostQuitMessage ( 0 ) ;
-        break;
-
-    default:
-        return DefWindowProc ( hwnd, message, wParam, lParam );
-        break;
+        default:
+            return DefWindowProc ( hwnd, message, wParam, lParam );
+            break;
     }
 
     return FALSE;
@@ -846,21 +705,21 @@ static BOOL PEInfo ( HWND hdlg )
     ldata.hlist = himplst;
     ldata.index = 0;
     LVClear ( himplst );
-    PE_EnumImports ( ( DWORD )pemodule.filebase, 0, ( ENUMIMPORTFNSPROC )EnumImpProc, ( DWORD )&ldata );
+    PE_EnumImports ( ( IMG_BASE )pemodule.filebase, 0, ( ENUMIMPORTFNSPROC )EnumImpProc, ( DWORD )&ldata );
 
     // list exports
     ldata.hlist = hexplst;
     ldata.index = 0;
     LVClear ( hexplst );
-    PE_EnumExports ( ( DWORD )pemodule.filebase, 0, ( ENUMEXPORTFNSPROC )EnumExpProc, ( DWORD )&ldata ); //BUG!!!!
+    PE_EnumExports ( ( IMG_BASE )pemodule.filebase, 0, ( ENUMEXPORTFNSPROC )EnumExpProc, ( DWORD )&ldata ); 
 
     // list PE info
     SendMessage ( hmisc, WM_SETTEXT, 0, 0 );
     wsprintf ( buf, TEXT("[S E C T I O N S]\r\n") );
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
-    PE_EnumSections ( ( DWORD )pemodule.filebase, ( ENUMSECTIONSPROC )EnumSecProc, ( DWORD )hmisc );
+    PE_EnumSections ( ( IMG_BASE )pemodule.filebase, ( ENUMSECTIONSPROC )EnumSecProc, ( DWORD )hmisc );
 
-    pImageFileHeader = ( PIMAGE_FILE_HEADER )PE_GetFileHeader ( ( DWORD )pemodule.filebase );
+    pImageFileHeader = ( PIMAGE_FILE_HEADER )PE_GetFileHeader ( ( IMG_BASE )pemodule.filebase );
 
     wsprintf ( buf, TEXT("\r\n[F I L E  H E A D E R]\r\n") );
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
@@ -886,9 +745,9 @@ static BOOL PEInfo ( HWND hdlg )
     wsprintf ( buf, TEXT("\tCharacteristics: 0x%0.8X\r\n"), pImageFileHeader->Characteristics );
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
 
-    PE_EnumCharacteristics ( (DWORD)pemodule.filebase, (ENUMFHATTRIBPROC)EnumAttrProc, (DWORD)hmisc );
+    PE_EnumCharacteristics ( (IMG_BASE)pemodule.filebase, (ENUMFHATTRIBPROC)EnumAttrProc, (DWORD)hmisc );
 
-    optionalHeader = (PIMAGE_OPTIONAL_HEADER)PE_GetOptionalHeader ( (DWORD)pemodule.filebase );
+    optionalHeader = (PIMAGE_OPTIONAL_HEADER)PE_GetOptionalHeader ( (IMG_BASE)pemodule.filebase );
 
     wsprintf ( buf, TEXT("\r\n[O P T I O N A L  H E A D E R]\r\n") );
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
@@ -1093,11 +952,6 @@ static BOOL IsNT ( void )
     return TRUE;
 }
 
-
-//
-// centreaza o fereastra in cadrul ecranului
-//
-
 static void CenterWindow ( HWND hwnd )
 /*******************************************************************************************************************/
 /* Center the app window on the screen                                                                             */
@@ -1114,3 +968,167 @@ static void CenterWindow ( HWND hwnd )
                  aRt.right, aRt.bottom, 0 );
 }
 
+static void Process_WM_COMMAND ( HWND hwnd, WPARAM wParam, LPARAM lParam )
+/*******************************************************************************************************************/
+/* Process WM_COMMAND for the main window                                                                          */
+{
+    if ( !lParam )
+    {
+        // menu processing
+        switch ( LOWORD ( wParam ) )
+        {
+            case IDM_QUIT:
+                SendMessage ( hwnd, WM_CLOSE, 0, 0 );
+                break;
+
+            case IDM_RUN:
+                RunFileDlg ( hwnd, g_hIcon, NULL, NULL, NULL, 0 );
+                LVClear ( g_hList );
+                GetProcesses ( g_hList );
+                break;
+
+            case IDM_ABOUT:
+                DialogBoxParam ( g_hInst, MAKEINTRESOURCE ( IDD_ABOUT ),
+                                hwnd, AboutDlgProc, ( LPARAM )hwnd );
+                break;
+
+            case IDM_PROP:
+                AdvancedInfo ( hwnd );
+                break;
+
+            case IDM_REFRESH:
+                LVClear ( g_hList );
+                GetProcesses ( g_hList );
+                break;
+            
+            case IDM_PRI_IDLE:
+                if ( !SetPriority ( IDLE_PRIORITY_CLASS ) )
+                {
+                    ShowMessage ( hwnd, TEXT("Unable to set priority."), MB_OK );
+                    break;
+                }
+                Sleep ( 50 );
+                LVClear ( g_hList );
+                GetProcesses ( g_hList );
+                break;
+
+            case IDM_PRI_NOR:
+                if ( !SetPriority ( NORMAL_PRIORITY_CLASS ) )
+                {
+                    ShowMessage ( hwnd, TEXT("Unable to set priority."), MB_OK );
+                    break;
+                }
+                Sleep ( 50 );
+                LVClear ( g_hList );
+                GetProcesses ( g_hList );
+                break;
+
+            case IDM_PRI_HI:
+                if ( !SetPriority ( HIGH_PRIORITY_CLASS ) )
+                {
+                    ShowMessage ( hwnd, TEXT("Unable to set priority."), MB_OK );
+                    break;
+                }
+                Sleep ( 50 );
+                LVClear ( g_hList );
+                GetProcesses ( g_hList );
+                break;
+
+            case IDM_PRI_REAL:
+                if ( !SetPriority ( REALTIME_PRIORITY_CLASS ) )
+                {
+                    ShowMessage ( hwnd, TEXT("Unable to set priority."), MB_OK );
+                    break;
+                }
+                Sleep ( 50 );
+                LVClear ( g_hList );
+                GetProcesses ( g_hList );
+                break;
+
+            case IDM_KILL:
+                if ( ShowMessage ( hwnd, TEXT("Terminate this process?"), MB_YESNOCANCEL ) == IDYES )
+                {
+                    if ( !KillProcess() )
+                        ShowMessage ( hwnd, TEXT("Unable to terminate process."), MB_OK );
+                    Sleep ( 300 );
+                    LVClear ( g_hList );
+                    GetProcesses ( g_hList );
+                }
+                break;
+        }
+    }
+}
+
+static void Process_WM_NOTIFY ( HWND hwnd, WPARAM wParam, LPARAM lParam )
+/*******************************************************************************************************************/
+/* Process WM_NOTIFY for the main window                                                                           */
+{
+    if ( wParam == IDC_PROCLIST )
+    {
+        switch ( ( ( NMHDR *) lParam )->code )
+        {
+            case NM_RCLICK:
+                if ( LVGetSelIndex ( g_hList ) != -1 )
+                {
+                    CheckRadioMenus();
+                    ToggleMenus ( GetSubMenu ( g_hMainmenu, 1 ) );
+                    ContextMenu();
+                }
+                break;
+
+            case NM_DBLCLK:
+                AdvancedInfo ( hwnd );
+                break;
+        }
+    }
+}
+
+static void InitPropsDlg ( HWND hDlg )
+/*******************************************************************************************************************/
+/* Init process properties dlg box                                                                                 */
+{
+    TCHAR       buf[256];
+    HWND        hmodlst, hexplst, himplst;
+    int         index;
+    DWORD       pid;
+    HANDLE      hProc;
+    FILETIME    ft1, ft2, ft3, ft4, local;
+    SYSTEMTIME  st;
+
+    CenterWindow ( hDlg );
+    hmodlst = GetDlgItem ( hDlg, IDC_MODULELIST );
+    hexplst = GetDlgItem ( hDlg, IDC_EXPLIST );
+    himplst = GetDlgItem ( hDlg, IDC_IMPLIST );
+    ListView_SetExtendedListViewStyle ( hmodlst, LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP );
+    ListView_SetExtendedListViewStyle ( himplst, LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP );
+    ListView_SetExtendedListViewStyle ( hexplst, LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP );
+    InitModuleColumns ( hmodlst );
+    InitImpColumns ( himplst );
+    InitExpColumns ( hexplst );
+    index   = LVGetSelIndex ( g_hList );
+    LVGetItemText ( g_hList, index, 0, buf, sizeof ( buf ) );
+    SetWindowText ( hDlg, buf );
+    LVGetItemText ( g_hList, index, 1, buf, sizeof ( buf ) );
+    pid = MyAtol ( buf );
+    GetModules ( hmodlst, pid );
+
+    if ( IsNT() )
+    {
+        hProc = OpenProcess ( PROCESS_QUERY_INFORMATION, FALSE, pid );
+        if ( hProc )
+        {
+            if ( GetProcessTimes ( hProc, &ft1, &ft2, &ft3, &ft4 ) )
+            {
+                FileTimeToLocalFileTime ( &ft1, &local );
+                FileTimeToSystemTime ( &local, &st );
+                wsprintf ( buf, TEXT("Process started on %0.2lu/%0.2lu/%lu, %0.2lu:%0.2lu:%0.2lu -- %d loaded modules" ),
+                          st.wDay, st.wMonth, st.wYear,
+                          st.wHour, st.wMinute, st.wSecond,
+                          LVGetCount ( hmodlst )
+                         );
+                SetDlgItemText ( hDlg, IDC_STATIC2, buf );
+                CloseHandle ( hProc );
+            }
+        }
+    }
+}
