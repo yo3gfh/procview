@@ -47,8 +47,10 @@
 
 #if defined(_AMD64_)
     #define IMG_BASE UINT64
+    #define EN_LPARAM UINT64
 #elif defined(_X86_)
     #define IMG_BASE DWORD
+    #define EN_LPARAM DWORD
 #else
     #error "Please choose either _AMD64_ or _X86_ architecture"
 #endif
@@ -114,32 +116,32 @@ typedef struct
 extern "C" {
 #endif
 
-typedef BOOL ( CALLBACK * ENUMIMPORTMODPROC ) 	( IMPORT_INFO *, DWORD );
-typedef BOOL ( CALLBACK * ENUMIMPORTFNSPROC ) 	( IMPORT_INFO *, DWORD );
+typedef BOOL ( CALLBACK * ENUMIMPORTMODPROC ) 	( IMPORT_INFO *, EN_LPARAM );
+typedef BOOL ( CALLBACK * ENUMIMPORTFNSPROC ) 	( IMPORT_INFO *, EN_LPARAM );
 
-typedef BOOL ( CALLBACK * GETEXPORTINFOPROC ) 	( EXPORT_INFO *, DWORD );
-typedef BOOL ( CALLBACK * ENUMEXPORTFNSPROC ) 	( EXPORT_INFO *, DWORD );
+typedef BOOL ( CALLBACK * GETEXPORTINFOPROC ) 	( EXPORT_INFO *, EN_LPARAM );
+typedef BOOL ( CALLBACK * ENUMEXPORTFNSPROC ) 	( EXPORT_INFO *, EN_LPARAM );
 
-typedef BOOL ( CALLBACK * ENUMSECTIONSPROC ) 	( SECTION_INFO *, DWORD );
-typedef BOOL ( CALLBACK * ENUMFHATTRIBPROC ) 	( TCHAR *, DWORD );
-typedef BOOL ( CALLBACK * HEXDUMPPROC ) 		( TCHAR *, DWORD );
+typedef BOOL ( CALLBACK * ENUMSECTIONSPROC ) 	( SECTION_INFO *, EN_LPARAM );
+typedef BOOL ( CALLBACK * ENUMFHATTRIBPROC ) 	( TCHAR *, EN_LPARAM );
+typedef BOOL ( CALLBACK * HEXDUMPPROC ) 		( TCHAR *, EN_LPARAM );
 
 BOOL 					WINAPI PE_OpenModule 			( TCHAR * modname, MOD_BASE * mod, BOOL readonly );
 BOOL 					WINAPI PE_CloseModule 			( MOD_BASE * mod );
 LPVOID 					WINAPI PE_RVAToPtr 				( DWORD rva, PIMAGE_NT_HEADERS pNTHeader, IMG_BASE imageBase );
 PIMAGE_SECTION_HEADER 	WINAPI PE_GetSectionHeader 		( DWORD rva, PIMAGE_NT_HEADERS pNTHeader );
 PIMAGE_SECTION_HEADER 	WINAPI PE_FindSection 			( const TCHAR * name, PIMAGE_NT_HEADERS pNTHeader );
-BOOL 					WINAPI PE_EnumImports 			( IMG_BASE base,ENUMIMPORTMODPROC enummod,ENUMIMPORTFNSPROC enumfns,DWORD lParam );
-BOOL 					WINAPI PE_EnumExports 			( IMG_BASE base, GETEXPORTINFOPROC getinfo, ENUMEXPORTFNSPROC enumfns, DWORD lParam );
-BOOL 					WINAPI PE_EnumSections 			( IMG_BASE base, ENUMSECTIONSPROC enumsections, DWORD lParam );
-BOOL 					WINAPI PE_EnumCharacteristics 	( IMG_BASE base, ENUMFHATTRIBPROC enumattrib, DWORD lParam );
+BOOL 					WINAPI PE_EnumImports 			( IMG_BASE base,ENUMIMPORTMODPROC enummod,ENUMIMPORTFNSPROC enumfns, EN_LPARAM lParam );
+BOOL 					WINAPI PE_EnumExports 			( IMG_BASE base, GETEXPORTINFOPROC getinfo, ENUMEXPORTFNSPROC enumfns, EN_LPARAM lParam );
+BOOL 					WINAPI PE_EnumSections 			( IMG_BASE base, ENUMSECTIONSPROC enumsections, EN_LPARAM lParam );
+BOOL 					WINAPI PE_EnumCharacteristics 	( IMG_BASE base, ENUMFHATTRIBPROC enumattrib, EN_LPARAM lParam );
 BOOL 					WINAPI PE_GetMachineType 		( DWORD machine, TCHAR * szoutbuf );
 LPVOID 					WINAPI PE_GetFileHeader 		( IMG_BASE base );
 LPVOID 					WINAPI PE_GetOptionalHeader 	( IMG_BASE base );
 LPVOID 					WINAPI PE_GetNTHeader 			( IMG_BASE base );
 BOOL  					WINAPI PE_IsConsole 			( IMG_BASE base );
 BOOL  					WINAPI PE_IsGUI 				( IMG_BASE base );
-BOOL 					WINAPI PE_HexDump 				( void * src, DWORD dwsrclen, HEXDUMPPROC hexdumpproc, DWORD lParam );
+BOOL 					WINAPI PE_HexDump 				( void * src, DWORD dwsrclen, HEXDUMPPROC hexdumpproc, EN_LPARAM lParam );
 
 
 #ifdef  __cplusplus

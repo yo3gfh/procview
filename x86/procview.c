@@ -89,10 +89,10 @@ static BOOL CALLBACK        PropsDlgProc        ( HWND hDlg, UINT uMsg, WPARAM w
 static void                 Process_WM_COMMAND  ( HWND hwnd, WPARAM wParam, LPARAM lParam );
 static void                 Process_WM_NOTIFY   ( HWND hwnd, WPARAM wParam, LPARAM lParam );
 static void                 InitPropsDlg        ( HWND hDlg );
-static BOOL CALLBACK        EnumImpProc         ( IMPORT_INFO *impinfo, DWORD lParam );
-static BOOL CALLBACK        EnumExpProc         ( EXPORT_INFO *expinfo, DWORD lParam );
-static BOOL CALLBACK        EnumSecProc         ( SECTION_INFO *secinfo, DWORD lParam );
-static BOOL CALLBACK        EnumAttrProc        ( TCHAR *buf, DWORD lParam );
+static BOOL CALLBACK        EnumImpProc         ( IMPORT_INFO *impinfo, EN_LPARAM lParam );
+static BOOL CALLBACK        EnumExpProc         ( EXPORT_INFO *expinfo, EN_LPARAM lParam );
+static BOOL CALLBACK        EnumSecProc         ( SECTION_INFO *secinfo, EN_LPARAM lParam );
+static BOOL CALLBACK        EnumAttrProc        ( TCHAR *buf, EN_LPARAM lParam );
 static int                  ShowMessage         ( HWND howner, TCHAR *message, DWORD style );
 static void                 GetProcesses        ( HWND hList );
 static void                 GetModules          ( HWND hList, LONG pid );
@@ -593,7 +593,7 @@ static BOOL SetPriority ( DWORD pclass )
 
 // CALLBACK FUNCTIONS FOR ENUMERATION
 
-static BOOL CALLBACK EnumImpProc ( IMPORT_INFO * impinfo, DWORD lParam )
+static BOOL CALLBACK EnumImpProc ( IMPORT_INFO * impinfo, EN_LPARAM lParam )
 /*******************************************************************************************************************/
 {
     LISTDATA    * pldata;
@@ -609,7 +609,7 @@ static BOOL CALLBACK EnumImpProc ( IMPORT_INFO * impinfo, DWORD lParam )
     return TRUE;
 }
 
-static BOOL CALLBACK EnumExpProc ( EXPORT_INFO * expinfo, DWORD lParam )
+static BOOL CALLBACK EnumExpProc ( EXPORT_INFO * expinfo, EN_LPARAM lParam )
 /*******************************************************************************************************************/
 {
     LISTDATA    * pldata;
@@ -626,7 +626,7 @@ static BOOL CALLBACK EnumExpProc ( EXPORT_INFO * expinfo, DWORD lParam )
     return TRUE;
 }
 
-static BOOL CALLBACK EnumSecProc ( SECTION_INFO * secinfo, DWORD lParam )
+static BOOL CALLBACK EnumSecProc ( SECTION_INFO * secinfo, EN_LPARAM lParam )
 /*******************************************************************************************************************/
 {
     TCHAR       buf[256];
@@ -652,7 +652,7 @@ static BOOL CALLBACK EnumSecProc ( SECTION_INFO * secinfo, DWORD lParam )
     return TRUE;
 }
 
-static BOOL CALLBACK EnumAttrProc ( TCHAR * buf, DWORD lParam )
+static BOOL CALLBACK EnumAttrProc ( TCHAR * buf, EN_LPARAM lParam )
 /*******************************************************************************************************************/
 {    
     TCHAR   temp[128];
@@ -705,19 +705,19 @@ static BOOL PEInfo ( HWND hdlg )
     ldata.hlist = himplst;
     ldata.index = 0;
     LVClear ( himplst );
-    PE_EnumImports ( ( IMG_BASE )pemodule.filebase, 0, ( ENUMIMPORTFNSPROC )EnumImpProc, ( DWORD )&ldata );
+    PE_EnumImports ( ( IMG_BASE )pemodule.filebase, 0, ( ENUMIMPORTFNSPROC )EnumImpProc, ( EN_LPARAM )&ldata );
 
     // list exports
     ldata.hlist = hexplst;
     ldata.index = 0;
     LVClear ( hexplst );
-    PE_EnumExports ( ( IMG_BASE )pemodule.filebase, 0, ( ENUMEXPORTFNSPROC )EnumExpProc, ( DWORD )&ldata ); 
+    PE_EnumExports ( ( IMG_BASE )pemodule.filebase, 0, ( ENUMEXPORTFNSPROC )EnumExpProc, ( EN_LPARAM )&ldata ); 
 
     // list PE info
     SendMessage ( hmisc, WM_SETTEXT, 0, 0 );
     wsprintf ( buf, TEXT("[S E C T I O N S]\r\n") );
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
-    PE_EnumSections ( ( IMG_BASE )pemodule.filebase, ( ENUMSECTIONSPROC )EnumSecProc, ( DWORD )hmisc );
+    PE_EnumSections ( ( IMG_BASE )pemodule.filebase, ( ENUMSECTIONSPROC )EnumSecProc, ( EN_LPARAM )hmisc );
 
     pImageFileHeader = ( PIMAGE_FILE_HEADER )PE_GetFileHeader ( ( IMG_BASE )pemodule.filebase );
 
@@ -745,7 +745,7 @@ static BOOL PEInfo ( HWND hdlg )
     wsprintf ( buf, TEXT("\tCharacteristics: 0x%0.8X\r\n"), pImageFileHeader->Characteristics );
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
 
-    PE_EnumCharacteristics ( (IMG_BASE)pemodule.filebase, (ENUMFHATTRIBPROC)EnumAttrProc, (DWORD)hmisc );
+    PE_EnumCharacteristics ( (IMG_BASE)pemodule.filebase, (ENUMFHATTRIBPROC)EnumAttrProc, ( EN_LPARAM )hmisc );
 
     optionalHeader = (PIMAGE_OPTIONAL_HEADER)PE_GetOptionalHeader ( (IMG_BASE)pemodule.filebase );
 
