@@ -75,7 +75,7 @@ HWND MakeStatusBar ( HWND hParent, int sbid, DWORD * panels, int numpanels )
     
     // optimize redraw
     style = GetClassLong (hstatus, GCL_STYLE);
-	
+    
     if ( style )
     {
         style &= ~( CS_HREDRAW | CS_VREDRAW );

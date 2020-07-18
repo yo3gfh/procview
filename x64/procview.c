@@ -799,7 +799,7 @@ static BOOL PEInfo ( HWND hdlg )
 
         default:
             lstrcat ( buf, TEXT("Unknown\r\n") );
-                break;
+            break;
     }
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
 

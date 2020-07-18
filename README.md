@@ -3,7 +3,7 @@
 **PROCVIEW, a small task manager with PE (portable executable) exploring facilities**
 
 Copyright (c) 2002-2020 Adrian Petrila, YO3GFH<br>
-Uses the PEHLP32 library (https://github.com/yo3gfh/pehlp32)
+Uses the PEHLP32 library (<https://github.com/yo3gfh/pehlp32/>)
     
 This was initially a lab project and test app for the PEHLP32 library.
 Dugged out recently and dusted off to compile with Pelle's C compiler.
