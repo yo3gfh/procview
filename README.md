@@ -1,6 +1,6 @@
 ﻿## Simple task manager
 
-**PROCVIEW, a small task manager with PE (portable executable) exploring facilities**
+**PROCVIEW, a small MS Windows task manager with PE (portable executable) exploring facilities**
 
 Copyright (c) 2002-2020 Adrian Petrila, YO3GFH<br>
 Uses the PEHLP32 library (<https://github.com/yo3gfh/pehlp32/>)
@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Features**
     
-* create, kill and change process priority
+* create and kill process, change process priority
 * list imported/exported modules, along with other PE information
         
 Please note that this is cca. 20 years old code, not particullary something
