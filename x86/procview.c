@@ -84,15 +84,15 @@ typedef struct
 // FUNCTION PROTOTYPES
 
 static LRESULT CALLBACK     WndProc             ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-static BOOL CALLBACK        AboutDlgProc        ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
-static BOOL CALLBACK        PropsDlgProc        ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static INT_PTR CALLBACK     AboutDlgProc        ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static INT_PTR CALLBACK     PropsDlgProc        ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
 static void                 Process_WM_COMMAND  ( HWND hwnd, WPARAM wParam, LPARAM lParam );
 static void                 Process_WM_NOTIFY   ( HWND hwnd, WPARAM wParam, LPARAM lParam );
 static void                 InitPropsDlg        ( HWND hDlg );
-static BOOL CALLBACK        EnumImpProc         ( IMPORT_INFO *impinfo, EN_LPARAM lParam );
-static BOOL CALLBACK        EnumExpProc         ( EXPORT_INFO *expinfo, EN_LPARAM lParam );
-static BOOL CALLBACK        EnumSecProc         ( SECTION_INFO *secinfo, EN_LPARAM lParam );
-static BOOL CALLBACK        EnumAttrProc        ( TCHAR *buf, EN_LPARAM lParam );
+static INT_PTR CALLBACK     EnumImpProc         ( IMPORT_INFO *impinfo, EN_LPARAM lParam );
+static INT_PTR CALLBACK     EnumExpProc         ( EXPORT_INFO *expinfo, EN_LPARAM lParam );
+static INT_PTR CALLBACK     EnumSecProc         ( SECTION_INFO *secinfo, EN_LPARAM lParam );
+static INT_PTR CALLBACK     EnumAttrProc        ( TCHAR *buf, EN_LPARAM lParam );
 static int                  ShowMessage         ( HWND howner, TCHAR *message, DWORD style );
 static void                 GetProcesses        ( HWND hList );
 static void                 GetModules          ( HWND hList, LONG pid );
@@ -197,7 +197,7 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     return msg.wParam;
 }
 
-static BOOL CALLBACK AboutDlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static INT_PTR CALLBACK AboutDlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
 /*******************************************************************************************************************/
 /* "About" dlg callback proc                                                                                       */
 {
@@ -223,7 +223,7 @@ static BOOL CALLBACK AboutDlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
     return TRUE;
 }
 
-static BOOL CALLBACK PropsDlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static INT_PTR CALLBACK PropsDlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
 /*******************************************************************************************************************/
 /* "Properties" dlg callback proc                                                                                  */
 {
@@ -593,7 +593,7 @@ static BOOL SetPriority ( DWORD pclass )
 
 // CALLBACK FUNCTIONS FOR ENUMERATION
 
-static BOOL CALLBACK EnumImpProc ( IMPORT_INFO * impinfo, EN_LPARAM lParam )
+static INT_PTR CALLBACK EnumImpProc ( IMPORT_INFO * impinfo, EN_LPARAM lParam )
 /*******************************************************************************************************************/
 {
     LISTDATA    * pldata;
@@ -609,7 +609,7 @@ static BOOL CALLBACK EnumImpProc ( IMPORT_INFO * impinfo, EN_LPARAM lParam )
     return TRUE;
 }
 
-static BOOL CALLBACK EnumExpProc ( EXPORT_INFO * expinfo, EN_LPARAM lParam )
+static INT_PTR CALLBACK EnumExpProc ( EXPORT_INFO * expinfo, EN_LPARAM lParam )
 /*******************************************************************************************************************/
 {
     LISTDATA    * pldata;
@@ -626,7 +626,7 @@ static BOOL CALLBACK EnumExpProc ( EXPORT_INFO * expinfo, EN_LPARAM lParam )
     return TRUE;
 }
 
-static BOOL CALLBACK EnumSecProc ( SECTION_INFO * secinfo, EN_LPARAM lParam )
+static INT_PTR CALLBACK EnumSecProc ( SECTION_INFO * secinfo, EN_LPARAM lParam )
 /*******************************************************************************************************************/
 {
     TCHAR       buf[256];
@@ -652,7 +652,7 @@ static BOOL CALLBACK EnumSecProc ( SECTION_INFO * secinfo, EN_LPARAM lParam )
     return TRUE;
 }
 
-static BOOL CALLBACK EnumAttrProc ( TCHAR * buf, EN_LPARAM lParam )
+static INT_PTR CALLBACK EnumAttrProc ( TCHAR * buf, EN_LPARAM lParam )
 /*******************************************************************************************************************/
 {    
     TCHAR   temp[128];
