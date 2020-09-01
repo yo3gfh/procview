@@ -411,7 +411,7 @@ static void GetModules ( HWND hList, LONG pid )
     TCHAR           buf[256];
     int             i;
 
-    hsnap = CreateToolhelp32Snapshot ( TH32CS_SNAPMODULE, pid );
+    hsnap = CreateToolhelp32Snapshot ( TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid );
     if ( hsnap == INVALID_HANDLE_VALUE ) return;
     me.dwSize = sizeof ( MODULEENTRY32 );
     ok = Module32First ( hsnap, &me );
@@ -683,7 +683,6 @@ static BOOL PEInfo ( HWND hdlg )
     index = LVGetSelIndex ( hmodlst );
     if ( index == -1 ) { return FALSE; }
     
-    // verificam daca modulul este de tip PE
     LVGetItemText ( hmodlst, index, 1, crtmod, sizeof ( crtmod ) );
 
     if ( !PE_OpenModule ( crtmod, &pemodule, TRUE ) ) { return FALSE; }
@@ -1114,7 +1113,7 @@ static void InitPropsDlg ( HWND hDlg )
 
     if ( IsNT() )
     {
-        hProc = OpenProcess ( PROCESS_QUERY_INFORMATION, FALSE, pid );
+        hProc = OpenProcess ( PROCESS_ALL_ACCESS/*PROCESS_QUERY_INFORMATION*/, FALSE, pid );
         if ( hProc )
         {
             if ( GetProcessTimes ( hProc, &ft1, &ft2, &ft3, &ft4 ) )
