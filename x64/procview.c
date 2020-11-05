@@ -723,7 +723,7 @@ static BOOL PEInfo ( HWND hdlg )
     wsprintf ( buf, TEXT("\r\n[F I L E  H E A D E R]\r\n") );
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
     
-    PE_GetMachineType ( pImageFileHeader->Machine, temp );
+    PE_GetMachineType ( pImageFileHeader->Machine, temp, ARRAYSIZE(temp) );
     wsprintf ( buf, TEXT("\tMachine: %s\r\n"), temp );
     SendMessage ( hmisc,  EM_REPLACESEL, 0, ( LPARAM )buf );
 
