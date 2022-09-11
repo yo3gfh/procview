@@ -989,6 +989,7 @@ static void Process_WM_COMMAND ( HWND hwnd, WPARAM wParam, LPARAM lParam )
             case IDM_ABOUT:
                 DialogBoxParam ( g_hInst, MAKEINTRESOURCE ( IDD_ABOUT ),
                                 hwnd, AboutDlgProc, ( LPARAM )hwnd );
+ 
                 break;
 
             case IDM_PROP:
